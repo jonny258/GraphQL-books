@@ -16,6 +16,7 @@ module.exports = {
 
     res.json(foundUser);
   },
+  //DONE
   // create a user, sign a token, and send it back (to client/src/components/SignUpForm.js)
   async createUser({ body }, res) {
     const user = await User.create(body);
@@ -26,6 +27,7 @@ module.exports = {
     const token = signToken(user);
     res.json({ token, user });
   },
+  //DONE
   // login a user, sign a token, and send it back (to client/src/components/LoginForm.js)
   // {body} is destructured req.body
   async login({ body }, res) {
@@ -42,6 +44,7 @@ module.exports = {
     const token = signToken(user);
     res.json({ token, user });
   },
+  //DONE
   // save a book to a user's `savedBooks` field by adding it to the set (to prevent duplicates)
   // user comes from `req.user` created in the auth middleware function
   async saveBook({ user, body }, res) {
@@ -58,6 +61,7 @@ module.exports = {
       return res.status(400).json(err);
     }
   },
+  //DONE
   // remove a book from `savedBooks`
   async deleteBook({ user, params }, res) {
     const updatedUser = await User.findOneAndUpdate(
@@ -70,4 +74,5 @@ module.exports = {
     }
     return res.json(updatedUser);
   },
+  //DONE
 };

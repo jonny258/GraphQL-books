@@ -11,9 +11,14 @@ const db = require('./config/connection');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+//TEMP
+const mockUser = { _id: '64b5926e5b7be53534bd1813', username: 'testuser', email: 'test@example.com' };
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  //TEMP
+  context: () => ({ user: mockUser }),
 });
 
 

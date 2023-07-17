@@ -33,6 +33,8 @@ const userSchema = new Schema(
 );
 
 // hash user password
+
+// Figure out how to do this in graph QL
 userSchema.pre('save', async function (next) {
   if (this.isNew || this.isModified('password')) {
     const saltRounds = 10;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery, gql } from '@apollo/client';
 import {
   Container,
   Col,
@@ -9,6 +10,8 @@ import {
 } from 'react-bootstrap';
 
 import Auth from '../utils/auth';
+import { GET_ALL_USERS, GET_SINGLE_USER } from '../graphQL/queries'; //Remove the ones that I dont use
+import { SAVE_BOOK_MUTATION } from '../graphQL/mutations';
 import { saveBook, searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 
@@ -20,6 +23,10 @@ const SearchBooks = () => {
 
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+  const { loading, error, data } = useQuery(GET_SINGLE_USER, {
+    variables: { userId: '64b575b3084f9d2c81e8d20f' },
+  });
+  console.log(data)
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
@@ -72,8 +79,9 @@ const SearchBooks = () => {
     }
 
     try {
+      //Use the mutate here
       const response = await saveBook(bookToSave, token);
-
+      console.log(response)
       if (!response.ok) {
         throw new Error('something went wrong!');
       }

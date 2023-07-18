@@ -18,12 +18,21 @@ export const GET_ALL_USERS = gql`
 `;
 
 export const GET_SINGLE_USER = gql`
-  query GetSingleUser($userId: ID!) {
-    getSingleUser(_id: $userId) {
+  query {
+    getSingleUser {
       _id
       username
       email
       bookCount
+      savedBooks {
+        _id
+        title
+        authors
+        link
+        description
+        bookId
+        image
+      }
     }
   }
 `;

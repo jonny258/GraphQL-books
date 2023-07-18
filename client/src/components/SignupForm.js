@@ -31,6 +31,7 @@ const SignupForm = () => {
     }
 
     try {
+      //console.log(userFormData.username,userFormData.email,userFormData.password)
       const response = await createUserMutation({
         variables: {
           input: {
@@ -47,6 +48,7 @@ const SignupForm = () => {
 
       const { token, user } = await response.data.createUser;
       console.log(user);
+      console.log(token);
       Auth.login(token);
     } catch (err) {
       console.error(err);

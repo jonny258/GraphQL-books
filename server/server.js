@@ -5,23 +5,30 @@ const { typeDefs, resolvers } = require("./schemas");
 
 const path = require('path');
 const db = require('./config/connection');
+const { authMiddleware } = require('./utils/auth');
 // const routes = require('./routes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 //TEMP
-const mockUser = { _id: '64b5926e5b7be53534bd1813', username: 'testuser', email: 'test@example.com' };
+//Context efffects this login
+//const mockUser = { _id: '64b5926e5b7be53534bd1813', username: 'testuser', email: 'test@example.com' };
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  //TEMP
-  context: () => ({ user: mockUser }),
+  context: ({ req }) => ({ req, user: req.user }),
+  // context: ({ req }) => {
+  //   const reqWithUser = authMiddleware(req);
+  //   return { req: reqWithUser };
+  // },
 });
 
 
+
 app.use(express.urlencoded({ extended: true }));
+app.use(authMiddleware)
 app.use(express.json());
 
 // if we're in production, serve client/build as static assets

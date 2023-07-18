@@ -9,9 +9,8 @@ const resolvers = {
       return await User.find({});
     },
     getSingleUser: async (parent, { _id, username }, context) => {
-      const foundUser = await User.findOne({
-        $or: [{ _id: _id }, { username }],
-      });
+      console.log(context.user._id);
+      const foundUser = await User.findById(context.user._id);
       console.log(foundUser);
       if (!foundUser) {
         throw new Error("Cannot find a user with this id or username!");
@@ -28,28 +27,22 @@ const resolvers = {
         throw new Error("Something went wrong!");
       }
 
-      const token = signToken(user);
-      return { token, user };
-    },
-    login: async (parent, { email, password }, context) => {
-      const user = await User.findOne({ email });
+      // set the user in the context
+      context.user = user;
+      console.log("CONTEXT USER");
 
-      if (!user) {
-        throw new Error("Can't find this user");
-      }
-
-      const correctPw = await user.isCorrectPassword(password);
-
-      if (!correctPw) {
-        throw new Error("Wrong password!");
-      }
+      console.log(context.user);
+      console.log("CONTEXT USER");
 
       const token = signToken(user);
       return { token, user };
     },
     saveBook: async (parent, { input }, context) => {
       const { user } = context;
-
+      //console.log(context.req)
+      console.log("CONTEXT USER");
+      console.log(context.user);
+      console.log("CONTEXT USER");
       if (!user) {
         throw new Error(
           "Authentication required. Please sign in to save a book."
@@ -68,6 +61,22 @@ const resolvers = {
         throw new Error("Error saving the book");
       }
     },
+    login: async (parent, { email, password }, context) => {
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw new Error("Can't find this user");
+      }
+
+      const correctPw = await user.isCorrectPassword(password);
+
+      if (!correctPw) {
+        throw new Error("Wrong password!");
+      }
+
+      const token = signToken(user);
+      return { token, user };
+    },
     deleteBook: async (parent, { bookId }, context) => {
       const { user } = context;
 
@@ -78,13 +87,13 @@ const resolvers = {
       }
 
       try {
-        console.log(user)
+        console.log(user);
         const updatedUser = await User.findOneAndUpdate(
           { _id: user._id },
           { $pull: { savedBooks: { bookId } } },
           { new: true }
         );
-        console.log(updatedUser)
+        console.log(updatedUser);
         if (!updatedUser) {
           return res
             .status(404)

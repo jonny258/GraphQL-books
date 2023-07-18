@@ -1,48 +1,35 @@
 const { User } = require("../models");
 const { signToken } = require("../utils/auth");
 
-// Create the functions that fulfill the queries defined in `typeDefs.js`
-//This is where the controler type functions will go
+//All the functions in here more or less reflect what the controller files would do
 const resolvers = {
+  //Querys would be the GET methods in a normal REST API
   Query: {
     getUsersAll: async () => {
       return await User.find({});
     },
+    //This is where the context comes into play the context.user has the data from the current user
     getSingleUser: async (parent, { _id, username }, context) => {
-      console.log(context.user._id);
       const foundUser = await User.findById(context.user._id);
       console.log(foundUser);
       if (!foundUser) {
         throw new Error("Cannot find a user with this id or username!");
       }
-
       return foundUser;
     },
   },
   Mutation: {
     createUser: async (parent, { input }, context) => {
       const user = await User.create(input);
-
       if (!user) {
         throw new Error("Something went wrong!");
       }
-
-      // set the user in the context
-      context.user = user;
-      console.log("CONTEXT USER");
-
-      console.log(context.user);
-      console.log("CONTEXT USER");
-
+      //This sets the token for the user
       const token = signToken(user);
       return { token, user };
     },
     saveBook: async (parent, { input }, context) => {
-      const { user } = context;
-      //console.log(context.req)
-      console.log("CONTEXT USER");
-      console.log(context.user);
-      console.log("CONTEXT USER");
+      const { user } = context; //This pulls user from the context
       if (!user) {
         throw new Error(
           "Authentication required. Please sign in to save a book."
@@ -87,7 +74,6 @@ const resolvers = {
       }
 
       try {
-        console.log(user);
         const updatedUser = await User.findOneAndUpdate(
           { _id: user._id },
           { $pull: { savedBooks: { bookId } } },

@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, gql, useMutation, ApolloClient, InMemoryCache, createHttpLink, ApolloLink } from "@apollo/client";
-import { setContext } from '@apollo/client/link/context'
+import { useMutation } from "@apollo/client";
 import { Container, Col, Form, Button, Card, Row } from "react-bootstrap";
-
 import Auth from "../utils/auth";
-import { GET_ALL_USERS, GET_SINGLE_USER } from "../graphQL/queries"; //Remove the ones that I dont use
 import { SAVE_BOOK_MUTATION } from "../graphQL/mutations";
-import { saveBook, searchGoogleBooks } from "../utils/API";
+import { searchGoogleBooks } from "../utils/API";
 import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
 
 const SearchBooks = () => {
@@ -14,19 +11,13 @@ const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState([]);
   // create state for holding our search field data
   const [searchInput, setSearchInput] = useState("");
-
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
   const [saveBookMutation, { loading, error, data }] =
-    useMutation(SAVE_BOOK_MUTATION);
-  // const { loading, error, data } = useQuery(GET_SINGLE_USER, {
-  //   variables: { userId: '64b575b3084f9d2c81e8d20f' },
-  // });
-  // console.log(data)
+    useMutation(SAVE_BOOK_MUTATION); //This is what save the book to the user
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
-  // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
   });
@@ -63,30 +54,21 @@ const SearchBooks = () => {
     }
   };
 
-  // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
-    const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    console.log(bookToSave);
-
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-    console.log(Auth.loggedIn())
-    console.log(Auth.getProfile())
-    console.log(Auth.getToken())
-
-    console.log(token)
+    const bookToSave = searchedBooks.find((book) => book.bookId === bookId); //Gets the object for the bookToSave based on the bookId
+    const token = Auth.loggedIn() ? Auth.getToken() : null; //Checks to see if the user is logged in
+    console.log(token);
     if (!token) {
       return false;
     }
 
     try {
+      //Validataion is handled in the backend
       const response = await saveBookMutation({
-        variables: { input: {book : bookToSave} },
-      });
+        variables: { input: { book: bookToSave } },
+      }); //The variables are wrapped in the input and then the book because that is how I have it set up in the TypeDef
+      // and then that makes it so I have to set it up like that in the mutation.js as well
       console.log(response);
-      console.log(response);
-      // if (!response.ok) {
-      //   throw new Error("something went wrong!");
-      // }
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
       console.error(err);

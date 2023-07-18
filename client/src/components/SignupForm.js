@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
-
-import { createUser } from '../utils/API';
-import { CREATE_USER_MUTATION } from '../graphQL/mutations';
-import { gql, useQuery, useMutation } from '@apollo/client';
-import Auth from '../utils/auth';
+import React, { useState } from "react";
+import { Form, Button, Alert } from "react-bootstrap";
+import { CREATE_USER_MUTATION } from "../graphQL/mutations";
+import { useMutation } from "@apollo/client";
+import Auth from "../utils/auth";
 
 const SignupForm = () => {
-  // set initial form state
-  const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
-  // set state for form validation
+  const [userFormData, setUserFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [validated] = useState(false);
-  // set state for alert
   const [showAlert, setShowAlert] = useState(false);
-  const [createUserMutation, { loading, error, data }] = useMutation(CREATE_USER_MUTATION);
+  const [createUserMutation, { loading, error, data }] =
+    useMutation(CREATE_USER_MUTATION);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -23,7 +23,6 @@ const SignupForm = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    // check if form has everything (as per react-bootstrap docs)
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
@@ -31,7 +30,7 @@ const SignupForm = () => {
     }
 
     try {
-      //console.log(userFormData.username,userFormData.email,userFormData.password)
+      //The validataion for this is handled in the backend
       const response = await createUserMutation({
         variables: {
           input: {
@@ -40,13 +39,10 @@ const SignupForm = () => {
             password: userFormData.password,
           },
         },
-      });
-      
-      // if (!response.ok) {
-      //   throw new Error('something went wrong!');
-      // }
+      }); //The variables are wrapped in another input because this is how I had my TypeRefs in the backend
+      //And because I had my TypeRefs like that in the backend I needed my mutation in the frontend to reflect that
 
-      const { token, user } = await response.data.createUser;
+      const { token, user } = response.data.createUser;
       console.log(user);
       console.log(token);
       Auth.login(token);
@@ -56,9 +52,9 @@ const SignupForm = () => {
     }
 
     setUserFormData({
-      username: '',
-      email: '',
-      password: '',
+      username: "",
+      email: "",
+      password: "",
     });
   };
 
@@ -67,52 +63,70 @@ const SignupForm = () => {
       {/* This is needed for the validation functionality above */}
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
         {/* show alert if server response is bad */}
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
+        <Alert
+          dismissible
+          onClose={() => setShowAlert(false)}
+          show={showAlert}
+          variant="danger"
+        >
           Something went wrong with your signup!
         </Alert>
 
-        <Form.Group className='mb-3'>
-          <Form.Label htmlFor='username'>Username</Form.Label>
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="username">Username</Form.Label>
           <Form.Control
-            type='text'
-            placeholder='Your username'
-            name='username'
+            type="text"
+            placeholder="Your username"
+            name="username"
             onChange={handleInputChange}
             value={userFormData.username}
             required
           />
-          <Form.Control.Feedback type='invalid'>Username is required!</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Username is required!
+          </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group className='mb-3'>
-          <Form.Label htmlFor='email'>Email</Form.Label>
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="email">Email</Form.Label>
           <Form.Control
-            type='email'
-            placeholder='Your email address'
-            name='email'
+            type="email"
+            placeholder="Your email address"
+            name="email"
             onChange={handleInputChange}
             value={userFormData.email}
             required
           />
-          <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Email is required!
+          </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group className='mb-3'>
-          <Form.Label htmlFor='password'>Password</Form.Label>
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="password">Password</Form.Label>
           <Form.Control
-            type='password'
-            placeholder='Your password'
-            name='password'
+            type="password"
+            placeholder="Your password"
+            name="password"
             onChange={handleInputChange}
             value={userFormData.password}
             required
           />
-          <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Password is required!
+          </Form.Control.Feedback>
         </Form.Group>
         <Button
-          disabled={!(userFormData.username && userFormData.email && userFormData.password)}
-          type='submit'
-          variant='success'>
+          disabled={
+            !(
+              userFormData.username &&
+              userFormData.email &&
+              userFormData.password
+            )
+          }
+          type="submit"
+          variant="success"
+        >
           Submit
         </Button>
       </Form>

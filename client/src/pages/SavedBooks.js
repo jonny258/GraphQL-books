@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Container, Card, Button, Row, Col } from "react-bootstrap";
-
-import { getMe, deleteBook } from "../utils/API";
 import { GET_SINGLE_USER } from "../graphQL/queries";
 import { DELETE_BOOK_MUTATION } from "../graphQL/mutations";
 import { useQuery, useMutation } from "@apollo/client";
@@ -11,45 +9,47 @@ import { removeBookId } from "../utils/localStorage";
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
 
-  const [deleteBookMutation, { loading: deleteBookLoading, error: deleteBookError, data: deleteBookData }] =
-  useMutation(DELETE_BOOK_MUTATION);
+  const {
+    loading: singleUserLoading,
+    error: singleUseEerror,
+    data: singleUserData,
+  } = useQuery(GET_SINGLE_USER); //This is what gets the single user, it doesn't need a variable because of context
+  const [
+    deleteBookMutation,
+    {
+      loading: deleteBookLoading,
+      error: deleteBookError,
+      data: deleteBookData,
+    },
+  ] = useMutation(DELETE_BOOK_MUTATION);
+  //This is what deletes the book from the backend, the vaiables above have to be called  loading, error, and data.
+  //But you can get around that by doing what I did above
 
-  // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
 
-  // const { loading, error, data } = useQuery(GET_SINGLE_USER, {
-  //   variables: { userId: "64b575b3084f9d2c81e8d20f" },
-  // });
-  // console.log(data);
-  const [userId, setUserId] = useState(null);
-
-  const { loading: singleUserLoading, error: singleUseEerror, data: singleUserData } = useQuery(GET_SINGLE_USER);
-  console.log(singleUserData);
-
-  //REMOVE THE USE CALLBACK AND USE EFFECT IF I CAN JUST USE THE USE QUERY
-  const getUserData = useCallback(async () => {
+  const getUserData = async () => {
     try {
+      //This makes sure that the user is logged in if not the if statement below will trigger causeing this function to return false
       const token = Auth.loggedIn() ? Auth.getToken() : null;
-      console.log(token);
-    
+
       if (!token) {
         return false;
       }
-      
-      console.log(userData);
-      if(singleUserData){
-        setUserData(singleUserData.getSingleUser)
+
+      if (singleUserData) {
+        //This checks to see if the singleUserData is not null before setting it to the userState
+        setUserData(singleUserData.getSingleUser);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [singleUserData]);  // Pass 'data' to the dependency array
-    // An empty array means the callback never changes
+  };
 
+  //This useEffect runs whenever the singleUserData is changed, it only changes one time just when it is initially assigned from the useQuery
+  //This ensures that that the singleUserData is defined and able to be worked with in the getUserData function
   useEffect(() => {
     getUserData();
-  }, [getUserData]);
-  
+  }, [singleUserData]);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -60,23 +60,11 @@ const SavedBooks = () => {
     }
 
     try {
-      //const response = await deleteBook(bookId, token);
-
-      //THIS WORKS BUT HOW
-      //ADD VALIDATION ADD COMMENTS
-      console.log(bookId)
+      //This removes the book based on the google bookId
       const response = await deleteBookMutation({
         variables: { bookId },
       });
-      console.log(response)
-
-      // if (!response.ok) {
-      //   throw new Error("something went wrong!");
-      // }
-
-      // const updatedUser = await response.json();
-      // setUserData(updatedUser);
-      // upon success, remove book's id from localStorage
+      console.log(response);
       removeBookId(bookId);
     } catch (err) {
       console.error(err);
@@ -107,7 +95,7 @@ const SavedBooks = () => {
           {userData.savedBooks.map((book, index) => {
             return (
               <Col md="4" key={index}>
-                <Card  border="dark">
+                <Card border="dark">
                   {book.image ? (
                     <Card.Img
                       src={book.image}

@@ -14,11 +14,11 @@ const typeDefs = gql`
   type Book {
     _id: ID
     authors: [String]
-    description: String!
-    bookId: String!
+    description: String
+    bookId: String
     image: String
     link: String
-    title: String!
+    title: String
   }
 
   # Define which queries the front end is allowed to make and what data is returned
